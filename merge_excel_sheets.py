@@ -88,62 +88,124 @@ def merge_excel_sheets(file_path):
 
 def improve_column_names(df, columns):
     improved_names = []
+    name_count = {}
     
+    # First pass - get basic improved names
+    basic_names = []
     for col in columns:
         if col == 'source_sheet':
-            improved_names.append('Source_Sheet')
+            basic_names.append('Source_Sheet')
             continue
         
-        sample_values = df[col].dropna().head(50).astype(str).tolist()
-        
-        if not sample_values:
-            improved_names.append(col)
-            continue
-        
-        sample_text = ' '.join(sample_values).lower()
+        improved_name = col
         
         if col.lower() in ['data1', 'data1name']:
-            improved_names.append('License_Number')
+            improved_name = 'License_Number'
         elif col.lower() in ['tree']:
-            improved_names.append('Tree_Type')
+            improved_name = 'Tree_Type'
         elif col.lower() in ['quant']:
-            improved_names.append('Tree_Quantity')
+            improved_name = 'Tree_Quantity'
         elif col.lower() in ['city', 'cityname']:
-            improved_names.append('City')
+            improved_name = 'City'
         elif col.lower() in ['street']:
-            improved_names.append('Street')
+            improved_name = 'Street'
         elif col.lower() in ['homenumber']:
-            improved_names.append('House_Number')
+            improved_name = 'House_Number'
         elif col.lower() in ['gush']:
-            improved_names.append('Land_Block')
+            improved_name = 'Land_Block'
         elif col.lower() in ['helka']:
-            improved_names.append('Land_Parcel')
+            improved_name = 'Land_Parcel'
         elif col.lower() in ['fromdate']:
-            improved_names.append('Start_Date')
+            improved_name = 'Start_Date'
         elif col.lower() in ['todate']:
-            improved_names.append('End_Date')
+            improved_name = 'End_Date'
         elif col.lower() in ['price']:
-            improved_names.append('Price')
+            improved_name = 'Price'
         elif col.lower() in ['siba']:
-            improved_names.append('Reason_Code')
+            improved_name = 'Reason_Code'
         elif col.lower() in ['sibatext']:
-            improved_names.append('Reason_Description')
+            improved_name = 'Reason_Description'
         elif col.lower() in ['peula']:
-            improved_names.append('Action_Type')
+            improved_name = 'Action_Type'
         elif col.lower() in ['rname']:
-            improved_names.append('Applicant_Name')
+            improved_name = 'Applicant_Name'
         elif col.lower() in ['ezor']:
-            improved_names.append('Area')
+            improved_name = 'Area'
         elif 'date' in col.lower():
-            improved_names.append('Date')
+            improved_name = 'Date'
         elif 'name' in col.lower():
-            improved_names.append('Name')
+            improved_name = 'Name'
         elif col.startswith('Column_'):
-            improved_names.append(f'Data_{col.split("_")[1]}')
+            improved_name = f'Data_{col.split("_")[1]}'
+        elif col == 'כמות':
+            improved_name = 'Quantity'
+        elif col == 'מין העץ':
+            improved_name = 'Tree_Species'
+        elif col == 'סיבה':
+            improved_name = 'Reason'
+        elif col == 'פעולה':
+            improved_name = 'Action'
+        elif col == 'מספר רישיון':
+            improved_name = 'License_ID'
+        elif col == 'ישוב':
+            improved_name = 'Settlement'
+        elif col == 'אזור':
+            improved_name = 'Region'
         else:
-            improved_names.append(col)
+            improved_name = col.replace(' ', '_').replace('/', '_')
+        
+        basic_names.append(improved_name)
     
-    print(f"\nColumn name improvements:")
+    # Second pass - detect data types and handle duplicates
+    for i, (col, basic_name) in enumerate(zip(columns, basic_names)):
+        # Determine data type based on sample data
+        sample_data = df[col].dropna().head(20)
+        data_type = "Text"
+        
+        if len(sample_data) > 0:
+            # Check if mostly numeric
+            numeric_count = 0
+            for value in sample_data:
+                try:
+                    float(value)
+                    numeric_count += 1
+                except:
+                    pass
+            
+            if numeric_count / len(sample_data) > 0.7:  # If more than 70% are numeric
+                data_type = "Number"
+            elif sample_data.dtype.name.startswith('datetime'):
+                data_type = "Date"
+            else:
+                data_type = "Text"
+        
+        # Handle duplicates by adding data type
+        if basic_name in name_count:
+            name_count[basic_name] += 1
+            if data_type == "Number":
+                final_name = f'{basic_name}_Num_{name_count[basic_name]}'
+            elif data_type == "Date":
+                final_name = f'{basic_name}_Date_{name_count[basic_name]}'
+            else:
+                final_name = f'{basic_name}_Text_{name_count[basic_name]}'
+        else:
+            # Check if this name will be duplicated later
+            future_duplicates = sum(1 for future_name in basic_names[i+1:] if future_name == basic_name)
+            if future_duplicates > 0:
+                name_count[basic_name] = 0
+                if data_type == "Number":
+                    final_name = f'{basic_name}_Number'
+                elif data_type == "Date":
+                    final_name = f'{basic_name}_Date'
+                else:
+                    final_name = f'{basic_name}_Text'
+            else:
+                final_name = basic_name
+                name_count[basic_name] = 0
+        
+        improved_names.append(final_name)
+    
+    print(f"\nColumn name improvements with data types:")
     for old, new in zip(columns, improved_names):
         if old != new:
             print(f"  {old} -> {new}")
