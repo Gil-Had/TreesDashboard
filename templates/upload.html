@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>דשבורד כריתת עצים 🌳</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 30px; background-color: #f5f5f5; }
+    h2, h3, h4 { color: #2b5329; }
+    table { margin: 0 auto; border-collapse: collapse; width: 60%; direction: rtl; background: white; border-radius: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    canvas { max-width: 700px; margin: 40px auto; display: block; background: white; border-radius: 12px; padding: 15px; }
+    button { background: #4CAF50; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #388E3C; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>🌲 מערכת דוחות כריתת עצים בישראל</h2>
+  <form id="uploadForm">
+    <label>📁 קובץ עצים:</label><br>
+    <input type="file" name="file1" accept=".xlsx" required><br><br>
+
+    <label>📁 קובץ ערערים:</label><br>
+    <input type="file" name="file2" accept=".xlsx" required><br><br>
+
+    <button type="submit">העלה ועבד קבצים</button>
+  </form>
+
+  <div id="loading" style="display:none;">מעבד נתונים... אנא המתן 🌳</div>
+  <div id="result"></div>
+
+  <div class="charts">
+    <h4>🏷️ 10 הערים עם הכי הרבה רישיונות כריתה</h4>
+    <canvas id="licenseChart"></canvas>
+
+    <h4>🌴 10 סוגי העצים שנכרתו הכי הרבה</h4>
+    <canvas id="treeChart"></canvas>
+
+    <h4>🪓 10 הסיבות השכיחות ביותר לכריתת עצים</h4>
+    <canvas id="reasonBarChart"></canvas>
+
+    <h4>🏛️ 10 הערים שבהן הוגשו הכי הרבה עררים להצלת עצים</h4>
+    <canvas id="appealCitiesChart"></canvas>
+
+    <h4>🌳 10 העררים הגדולים ביותר שאושרו לשימור עצים</h4>
+    <canvas id="topAppealsChart"></canvas>
+
+    <h4>🪵 הסיבות הנפוצות ביותר בעררים שהצליחו</h4>
+    <canvas id="appealReasonsChart"></canvas>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('result').innerHTML = '';
+
+      const response = await fetch('/upload', { method: 'POST', body: formData });
+      const data = await response.json();
+      document.getElementById('loading').style.display = 'none';
+
+      if (data.error) {
+        document.getElementById('result').innerText = data.error;
+        return;
+      }
+
+      // === טבלה ===
+      let html = `
+        <p><a href="/download/MergeFile.xlsx">📥 הורד את קובץ העצים המעובד</a></p>
+        <p><a href="/download/Appellants_Analyzed.xlsx">📥 הורד את קובץ הערערים המעובד</a></p>
+        <h3>10 הערים שבהן נכרתו הכי הרבה עצים 🌳</h3>
+        <table><tr><th>עיר</th><th>מספר עצים</th></tr>`;
+      
+      data.top_cities.forEach(row => {
+        html += `<tr><td>${row.City}</td><td>${row.numberOfTrees}</td></tr>`;
+      });
+      html += `</table>
+
+      <h4>🏙️ פילוח כל הערים לפי אחוז העצים שנכרתו</h4>
+      <canvas id="cityPieChart"></canvas>`;
+
+      document.getElementById('result').innerHTML = html;
+
+      // ✅ גרף אחוזים לפי עיר
+      const cityLabels = (data.city_distribution_percent || []).map(r => r.City);
+      const cityPercents = (data.city_distribution_percent || []).map(r => r.Percent);
+
+      new Chart(document.getElementById('cityPieChart'), {
+        type: 'pie',
+        data: {
+          labels: cityLabels,
+          datasets: [{
+            data: cityPercents,
+            backgroundColor: [
+              '#4caf50', '#81c784', '#c8e6c9', '#2e7d32',
+              '#66bb6a', '#a5d6a7', '#388e3c', '#43a047',
+              '#9ccc65', '#b9f6ca'
+            ]
+          }]
+        },
+        options: {
+          plugins: {
+            title: { display: true, text: '🏙️ פילוח ערים לפי אחוז העצים שנכרתו (%)' },
+            legend: { position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed;
+                  return `${label}: ${value}%`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // === גרף רישיונות כריתה ===
+      if (data.top_licenses) {
+        new Chart(document.getElementById('licenseChart'), {
+          type: 'bar',
+          data: {
+            labels: data.top_licenses.map(r => r.City),
+            datasets: [{
+              label: 'מספר רישיונות כריתה',
+              data: data.top_licenses.map(r => r.LicenseCount),
+              backgroundColor: '#6d9e52'
+            }]
+          },
+          options: {
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: '🏷️ 10 הערים עם הכי הרבה רישיונות כריתה' }
+              // ❌ הסרת datalabels כדי שלא יוצגו מספרים מעל כל עמודה
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
+
+      // === גרף סוגי עצים ===
+      new Chart(document.getElementById('treeChart'), {
+        type: 'bar',
+        data: {
+          labels: data.top_trees.map(r => r.TreeName),
+          datasets: [{
+            label: 'מספר כריתות לפי מין עץ',
+            data: data.top_trees.map(r => r.numberOfTrees),
+            backgroundColor: '#2e7d32'
+          }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      // === גרף סיבות כריתה ===
+      new Chart(document.getElementById('reasonBarChart'), {
+        type: 'bar',
+        data: {
+          labels: data.top_reasons.map(r => r.Reason),
+          datasets: [{
+            label: 'מספר מופעים',
+            data: data.top_reasons.map(r => r.Count),
+            backgroundColor: '#8bc34a'
+          }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      // === גרף ערים עם עררים ===
+      if (data.appeal_cities) {
+        new Chart(document.getElementById('appealCitiesChart'), {
+          type: 'bar',
+          data: {
+            labels: data.appeal_cities.map(r => r.city),
+            datasets: [{
+              label: 'מספר עררים להצלת עצים',
+              data: data.appeal_cities.map(r => r.count),
+              backgroundColor: '#66bb6a'
+            }]
+          },
+          options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+      }
+
+      // === גרף עררים שהצליחו ===
+      if (data.top_successful_appeals) {
+        new Chart(document.getElementById('topAppealsChart'), {
+          type: 'bar',
+          data: {
+            labels: data.top_successful_appeals.map(r => r.city),
+            datasets: [{
+              label: 'מספר עצים שנשמרו',
+              data: data.top_successful_appeals.map(r => r.saved),
+              backgroundColor: '#43a047'
+            }]
+          },
+          options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+      }
+
+      // === גרף סיבות בעררים מוצלחים ===
+      if (data.appeal_reasons) {
+        const total = data.appeal_reasons.reduce((sum, r) => sum + r.count, 0);
+        new Chart(document.getElementById('appealReasonsChart'), {
+          type: 'pie',
+          data: {
+            labels: data.appeal_reasons.map(r => r.reason),
+            datasets: [{
+              data: data.appeal_reasons.map(r => r.count),
+              backgroundColor: [
+                '#2e7d32', '#66bb6a', '#81c784', '#a5d6a7',
+                '#388e3c', '#43a047', '#4caf50', '#9ccc65',
+                '#b9f6ca', '#c8e6c9'
+              ]
+            }]
+          },
+          options: {
+            plugins: {
+              title: { display: true, text: '🪵 סיבות נפוצות בעררים שהצליחו' },
+              legend: { position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed;
+                    const percent = ((value / total) * 100).toFixed(1);
+                    return `${label}: ${value} (${percent}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+    });
+  </script>
+</body>
+</html>

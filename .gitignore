@@ -1,0 +1,13 @@
+# Ignore virtual environments
+venv/
+
+# Ignore uploads and outputs folders
+uploads/
+outputs/
+
+# Ignore cache and system files
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.DS_Store
