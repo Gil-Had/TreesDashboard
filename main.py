@@ -8,18 +8,18 @@ from tqdm import tqdm
 
 app = Flask(__name__)
 
-# 🧠 התחברות ל-API של OpenAI (דורש משתנה סביבה OPENAI_API_KEY)
+# Connection to OpenAI API (requires OPENAI_API_KEY environment variable)
 client = OpenAI()
 
 @app.route('/')
 def index():
-    # 📄 דף הבית — טופס העלאת קבצים
+    # Home page — file upload form
     return render_template('upload.html')
 
 
 @app.route('/upload', methods=['POST'])
 def upload_excel():
-    # 📥 קבלת שני קבצים — קובץ עצים וקובץ ערערים
+    # Receive two files — trees file and appellants file
     file1 = request.files.get('file1')
     file2 = request.files.get('file2')
 
@@ -30,7 +30,7 @@ def upload_excel():
     os.makedirs('outputs', exist_ok=True)
 
     # ==========================
-    # 🌳 שלב 1: עיבוד קובץ העצים
+    # Step 1: Process trees file
     # ==========================
     path_trees = os.path.join('uploads', file1.filename)
     file1.save(path_trees)
@@ -38,13 +38,13 @@ def upload_excel():
     xl = pd.ExcelFile(path_trees)
     final_report = pd.DataFrame()
 
-    # --- מעבר על כל הגיליונות (למעט רשימות עזר) ---
+    # Iterate through all sheets (excluding auxiliary lists)
     for sheet_name in xl.sheet_names:
         if sheet_name not in ["רשימת עצים לפי קודים", "רשימת ערים לפי קודים"]:
             df = xl.parse(sheet_name, header=1)
-            df["City!"] = sheet_name  # שם העיר נקבע לפי שם הגיליון
+            df["City!"] = sheet_name  # City name determined by sheet name
 
-            # ✅ אחידות שמות עמודות
+            # Standardize column names
             for name in ["כמות", "Quant", "כמות עצים", "סה'כ לכריתה", "מספר עצים"]:
                 df.rename(columns={name: "numberOfTrees!"}, inplace=True)
             for name in ["סיבה", "Siba"]:
@@ -52,15 +52,15 @@ def upload_excel():
             for name in ["מין העץ", "Tree", "שם   מין עץ"]:
                 df.rename(columns={name: "TreeName!"}, inplace=True)
 
-            # אם אין עמודת סיבה, נכניס ערך ברירת מחדל
+            # Add default value if no reason column exists
             if "Siba!" not in df.columns:
                 df["Siba!"] = "לא ידוע"
 
-            # ניקוי שמירה לעמודות החשובות בלבד
+            # Keep only relevant columns
             df = df[["City!", "TreeName!", "Siba!", "numberOfTrees!"]].reset_index(drop=True)
             final_report = pd.concat([final_report, df], ignore_index=True)
 
-    # 🧾 המרת קודי סיבה לטקסט קריא
+    # Convert reason codes to readable text
     mapping = {
         1: "אחר", 2: "בטיחות", 3: "מחלת עץ", 4: "סכנה בריאותית", 5: "בנייה",
         6: "הכשרה חקלאית", 7: "עץ מת", 8: "דילול יער", 9: "קריאה", 10: "סניטציה", 11: "לא ידוע"
@@ -78,7 +78,7 @@ def upload_excel():
         final_report["Siba!"] = final_report["Siba!"].fillna("לא ידוע")
         final_report.loc[final_report["Siba!"].astype(str).str.strip() == "", "Siba!"] = "לא ידוע"
 
-    # 🪵 מיזוג עם רשימת שמות העצים
+    # Merge with tree name list
     tree_codes = xl.parse("רשימת עצים לפי קודים", header=2)
     tree_codes.Tree = tree_codes.Tree.astype(str) + ".0"
     final_report["TreeName!"] = final_report["TreeName!"].astype(str)
@@ -88,12 +88,12 @@ def upload_excel():
                                          final_report["שם עץ"], final_report["TreeName!"])
     final_report.drop(columns=["Tree", "שם עץ"], inplace=True)
 
-    # ניקוי שמות עמודות
+    # Clean column names
     final_report.columns = final_report.columns.str[:-1]
     output_trees = os.path.join('outputs', 'MergeFile.xlsx')
     final_report.to_excel(output_trees, index=False)
 
-    # 📊 חישובי דשבורד לקובץ העצים
+    # Dashboard calculations for trees file
     city_summary = final_report.groupby('City')['numberOfTrees'].sum().sort_values(ascending=False).head(10)
     top_cities = city_summary.reset_index().to_dict(orient='records')
 
@@ -116,7 +116,7 @@ def upload_excel():
         .reset_index().to_dict(orient='records')
     )
 
-    # ✅ חדש: 10 הערים עם הכי הרבה רישיונות כריתה (כל שורה = רישיון) — נספר שורות לכל עיר
+    # Top 10 cities with the highest number of cutting permits (each row = one permit)
     top_licenses = (
         final_report
         .groupby('City')
@@ -127,8 +127,8 @@ def upload_excel():
         .to_dict(orient='records')
     )
 
-    # ✅ חדש: אחוזים לפי עיר מסך כל העצים שנכרתו (לגרף העוגה באחוזים)
-    total_trees_all_cities = sum([c['numberOfTrees'] for c in city_distribution]) or 1  # הגנה מחלוקה ב-0
+    # Percent distribution of total cut trees by city (for pie chart)
+    total_trees_all_cities = sum([c['numberOfTrees'] for c in city_distribution]) or 1 # avoid division by zero
     city_distribution_percent = [
         {
             'City': c['City'],
@@ -138,7 +138,7 @@ def upload_excel():
     ]
 
     # =============================
-    # 🌿 שלב 2: עיבוד קובץ הערערים
+    # Step 2: Process appellants file
     # =============================
     path_appellants = os.path.join('uploads', file2.filename)
     file2.save(path_appellants)
@@ -148,20 +148,20 @@ def upload_excel():
     df_app = df_app.iloc[:, 2:6]
     df_app.columns = ["כתובת", "סיבת הבקשה", "החלטת פקיד אזורי", "החלטת פקיד ממשלתי"]
 
-    # יצירת עמודות נוספות לעיבוד
+    # Add additional columns for processing
     df_app["ישוב"] = ""
     df_app["מספר עצים שנכרתו"] = 0
     df_app["מספר עצים שנשמרו"] = 0
     df_app["G"] = ""
     df_app["H"] = ""
 
-    print("🟢 מתחיל ניתוח GPT על קובץ הערערים...")
+    print("מתחיל ניתוח GPT על קובץ הערערים...")
 
-    max_rows = 221  # ⏱️ מגבלת שורות לניתוח (כדי לא לעבד רשומות ריקות)
+    max_rows = 221
 
     for i, row in tqdm(df_app.iterrows(), total=min(len(df_app), max_rows)):
         if i >= max_rows:
-            print(f"⏹️ הגעתי לשורה {i+1} — עוצר, אין צורך לעבור מעבר ל-221 רשומות.")
+            print(f"הגעתי לשורה {i+1} — עוצר, אין צורך לעבור מעבר ל-221 רשומות.")
             break
 
         address = str(row["כתובת"]).strip()
@@ -169,10 +169,10 @@ def upload_excel():
         appeal_decision = str(row["החלטת פקיד ממשלתי"]).strip()
 
         if not address and not local_decision and not appeal_decision:
-            print(f"⏹️ עצירה בשורה {i+1}: אין נתונים נוספים — סוף הרשומות.")
+            print(f"עצירה בשורה {i+1}: אין נתונים נוספים — סוף הרשומות.")
             break
 
-        # ✨ פרומפט GPT — ניתוח השורה והסקת מסקנות
+        # GPT prompt — analyze the row and infer conclusions
         prompt = f"""
         אתה עוזר אנליסט לקריאת החלטות כריתת עצים בישראל.
         הנתונים לשורה:
@@ -219,22 +219,22 @@ def upload_excel():
             df_app.at[i, "מספר עצים שנשמרו"] = result.get("saved", 0)
 
         except Exception as e:
-            print(f"⚠️ שגיאה בשורה {i+1}: {e}")
+            print(f"שגיאה בשורה {i+1}: {e}")
             df_app.at[i, "מספר עצים שנכרתו"] = 0
             df_app.at[i, "מספר עצים שנשמרו"] = 0
 
-    # 💾 שמירת קובץ הערערים לאחר עיבוד GPT
-    print("✅ ניתוח GPT הושלם, שומר קובץ ערערים...")
+    # Save the processed appellants file
+    print("ניתוח GPT הושלם, שומר קובץ ערערים...")
     output_appellants = os.path.join('outputs', 'Appellants_Analyzed.xlsx')
     df_app.to_excel(output_appellants, index=False)
 
     # =============================
-    # 📊 ניתוחים נוספים לעררים
+    # Additional analysis for appeals
     # =============================
     try:
         appeals_df = df_app.copy()
 
-        # 🏙️ 10 הערים שבהן הוגשו הכי הרבה עררים (G="Y")
+        # Top 10 cities with most appeals (G="Y")
         appeal_cities = (
             appeals_df[appeals_df["G"] == "Y"]
             .groupby("ישוב").size()
@@ -245,7 +245,7 @@ def upload_excel():
             .to_dict(orient="records")
         )
 
-        # 🌳 10 העררים הגדולים ביותר שהצליחו (H="YY")
+        # Top 10 successful appeals (H="YY")
         top_successful_appeals = (
             appeals_df[appeals_df["H"] == "YY"]
             .sort_values(by="מספר עצים שנשמרו", ascending=False)
@@ -254,7 +254,7 @@ def upload_excel():
             .to_dict(orient="records")
         )
 
-        # 🪵 סיבות הכריתה מתוך עמודה "סיבת הבקשה" עבור עררים שהצליחו (H="YY")
+        # Common reasons for successful appeals (H="YY")
         successful_appeals = appeals_df[appeals_df["H"] == "YY"]
         if not successful_appeals.empty:
             reason_counts = (
@@ -270,12 +270,12 @@ def upload_excel():
             appeal_reasons = []
 
     except Exception as e:
-        print(f"⚠️ שגיאה בעת ניתוח עררים: {e}")
+        print(f"שגיאה בעת ניתוח עררים: {e}")
         appeal_cities, top_successful_appeals, appeal_reasons = [], [], []
 
-    print("✅ כל הנתונים מוכנים — מחזיר תגובה ללקוח.")
+    print("כל הנתונים מוכנים — מחזיר תגובה ללקוח.")
 
-    # 🔁 החזרת נתונים ל-Frontend
+    # Return JSON response to frontend
     return jsonify({
         'message': 'שני הקבצים עובדו והוערכו בהצלחה',
         'trees_file': output_trees,
@@ -284,22 +284,22 @@ def upload_excel():
         'top_trees': top_trees,
         'top_reasons': top_reasons,
         'city_distribution': city_distribution,
-        'top_licenses': top_licenses,  # ✅ תוספת: 10 הערים עם הכי הרבה רישיונות (מספר שורות)
+        'top_licenses': top_licenses, 
         'appeal_cities': appeal_cities,
         'top_successful_appeals': top_successful_appeals,
         'appeal_reasons': appeal_reasons,
-        'city_distribution_percent': city_distribution_percent  # ✅ חדש: אחוזים לשימוש ב-frontend
+        'city_distribution_percent': city_distribution_percent
     })
 
 
 @app.route('/download/<path:filename>')
 def download_file(filename):
-    # 📎 הורדת קבצים מהתיקייה outputs
+    # Download files from 'outputs' directory
     return send_from_directory('outputs', filename, as_attachment=True)
 
 
 if __name__ == '__main__':
-    # 📁 יצירת תיקיות במידת הצורך והרצת השרת
+    # Create folders if not existing and start server
     os.makedirs('uploads', exist_ok=True)
     os.makedirs('outputs', exist_ok=True)
     app.run(debug=True)

@@ -2,52 +2,215 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>דשבורד כריתת עצים 🌳</title>
-  <style>
-    body { font-family: Arial; text-align: center; margin-top: 30px; background-color: #f5f5f5; }
-    h2, h3, h4 { color: #2b5329; }
-    table { margin: 0 auto; border-collapse: collapse; width: 60%; direction: rtl; background: white; border-radius: 10px; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
-    canvas { max-width: 700px; margin: 40px auto; display: block; background: white; border-radius: 12px; padding: 15px; }
-    button { background: #4CAF50; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #388E3C; }
-  </style>
+  <title>דוחות כריתת עצים 🌳</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ========= General Styles ========= */
+    body {
+      margin: 0;
+      font-family: 'Inter', Arial, sans-serif;
+      color: #1b5e20;
+      background: #f8faf9;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      background: linear-gradient(135deg, #4CAF50, #81C784);
+      color: white;
+      text-align: center;
+      padding: 80px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    header h2 {
+      font-size: 2.8em;
+      margin-bottom: 0;
+      color: #ffffff;
+    }
+
+    /* ========= Processing Section ========= */
+    section {
+      max-width: 1000px;
+      margin: 60px auto;
+      background: white;
+      padding: 40px 50px;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    h2, h3, h4 {
+      color: #2e7d32;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* ========= Upload Form ========= */
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: #f9fdf9;
+      border: 1px solid #dcedc8;
+      border-radius: 14px;
+      padding: 25px 30px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+      width: 80%;
+      margin: 0 auto 30px;
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #388E3C;
+    }
+
+    /* ========= Table ========= */
+    table {
+      margin: 30px auto;
+      border-collapse: collapse;
+      width: 70%;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    th {
+      background: #4CAF50;
+      color: white;
+      padding: 10px;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) { background-color: #f9f9f9; }
+
+    a {
+      color: #2e7d32;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ========= Charts Section ========= */
+    .charts {
+      display: none; /* Hidden at first */
+    }
+
+    .charts h4 {
+      margin-top: 50px;
+      text-align: center;
+      color: #2e7d32;
+    }
+
+    canvas {
+      max-width: 800px;
+      margin: 40px auto;
+      display: block;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    /* ========= Loading ========= */
+    #loading {
+      text-align: center;
+      color: #2e7d32;
+      font-size: 1.1em;
+      margin-top: 15px;
+    }
+
+    /* ========= Footer ========= */
+    footer {
+      text-align: center;
+      background: #e8f5e9;
+      color: #444;
+      font-size: 0.9em;
+      padding: 30px 10px;
+      margin-top: 60px;
+      border-top: 1px solid #c8e6c9;
+    }
+
+    /* ========= Center Download Links ========= */
+    #result p {
+      text-align: center;
+    }
+
+    #result a {
+      display: inline-block;
+      margin: 5px 0;
+      font-size: 1.05em;
+    }
+  </style>
 </head>
 <body>
-  <h2>🌲 מערכת דוחות כריתת עצים בישראל</h2>
-  <form id="uploadForm">
-    <label>📁 קובץ עצים:</label><br>
-    <input type="file" name="file1" accept=".xlsx" required><br><br>
 
-    <label>📁 קובץ ערערים:</label><br>
-    <input type="file" name="file2" accept=".xlsx" required><br><br>
+  <header>
+    <h2>🌳 מערכת עיבוד דוחות כריתת עצים 🌳</h2>
+  </header>
 
-    <button type="submit">העלה ועבד קבצים</button>
-  </form>
+  <section>
+    <form id="uploadForm">
+      <label>📁 דוח כריתת עצים:</label>
+      <input type="file" name="file1" accept=".xlsx" required>
 
-  <div id="loading" style="display:none;">מעבד נתונים... אנא המתן 🌳</div>
-  <div id="result"></div>
+      <label>📁 דוח ערערים:</label>
+      <input type="file" name="file2" accept=".xlsx" required>
 
-  <div class="charts">
-    <h4>🏷️ 10 הערים עם הכי הרבה רישיונות כריתה</h4>
-    <canvas id="licenseChart"></canvas>
+      <button type="submit">עבד קבצים</button>
+    </form>
 
-    <h4>🌴 10 סוגי העצים שנכרתו הכי הרבה</h4>
-    <canvas id="treeChart"></canvas>
+    <div id="loading" style="display:none;">מעבד נתונים... אנא המתן 🌳</div>
+    <div id="result"></div>
 
-    <h4>🪓 10 הסיבות השכיחות ביותר לכריתת עצים</h4>
-    <canvas id="reasonBarChart"></canvas>
+    <div class="charts">
+      <h4>📋 10 הערים עם הכי הרבה רישיונות כריתה 📋</h4>
+      <canvas id="licenseChart"></canvas>
 
-    <h4>🏛️ 10 הערים שבהן הוגשו הכי הרבה עררים להצלת עצים</h4>
-    <canvas id="appealCitiesChart"></canvas>
+      <h4>🌴 10 סוגי העצים שנכרתו הכי הרבה 🌴</h4>
+      <canvas id="treeChart"></canvas>
 
-    <h4>🌳 10 העררים הגדולים ביותר שאושרו לשימור עצים</h4>
-    <canvas id="topAppealsChart"></canvas>
+      <h4>🪓 10 הסיבות השכיחות ביותר לכריתת עצים 🪓</h4>
+      <canvas id="reasonBarChart"></canvas>
 
-    <h4>🪵 הסיבות הנפוצות ביותר בעררים שהצליחו</h4>
-    <canvas id="appealReasonsChart"></canvas>
-  </div>
+      <h4>🏛️ 10 הערים שבהן הוגשו הכי הרבה עררים להצלת עצים 🏛️</h4>
+      <canvas id="appealCitiesChart"></canvas>
+
+      <h4>🌳 10 העררים הגדולים ביותר שאושרו לשימור עצים 🌳</h4>
+      <canvas id="topAppealsChart"></canvas>
+
+      <h4>🪵 הסיבות הנפוצות ביותר בעררים שהצליחו 🪵</h4>
+      <canvas id="appealReasonsChart"></canvas>
+    </div>
+  </section>
+
+  <footer>
+    2025 Gil Hadad & Inbar Abraham | Ono Academic College | Trees Dashboard
+  </footer>
 
   <script>
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
@@ -55,6 +218,7 @@
       const formData = new FormData(this);
       document.getElementById('loading').style.display = 'block';
       document.getElementById('result').innerHTML = '';
+      document.querySelector('.charts').style.display = 'none'; // Hide charts during processing
 
       const response = await fetch('/upload', { method: 'POST', body: formData });
       const data = await response.json();
@@ -65,24 +229,24 @@
         return;
       }
 
-      // === טבלה ===
+      // Show charts only after successful upload
+      document.querySelector('.charts').style.display = 'block';
+
       let html = `
         <p><a href="/download/MergeFile.xlsx">📥 הורד את קובץ העצים המעובד</a></p>
         <p><a href="/download/Appellants_Analyzed.xlsx">📥 הורד את קובץ הערערים המעובד</a></p>
-        <h3>10 הערים שבהן נכרתו הכי הרבה עצים 🌳</h3>
+        <h3>🌳 10 הערים שנכרתו בהן הכי הרבה עצים 🌳</h3>
         <table><tr><th>עיר</th><th>מספר עצים</th></tr>`;
       
       data.top_cities.forEach(row => {
         html += `<tr><td>${row.City}</td><td>${row.numberOfTrees}</td></tr>`;
       });
       html += `</table>
-
-      <h4>🏙️ פילוח כל הערים לפי אחוז העצים שנכרתו</h4>
+      <h4>🏙️ פילוח כל הערים לפי אחוז העצים שנכרתו 🏙️</h4>
       <canvas id="cityPieChart"></canvas>`;
 
       document.getElementById('result').innerHTML = html;
 
-      // ✅ גרף אחוזים לפי עיר
       const cityLabels = (data.city_distribution_percent || []).map(r => r.City);
       const cityPercents = (data.city_distribution_percent || []).map(r => r.Percent);
 
@@ -101,7 +265,6 @@
         },
         options: {
           plugins: {
-            title: { display: true, text: '🏙️ פילוח ערים לפי אחוז העצים שנכרתו (%)' },
             legend: { position: 'bottom' },
             tooltip: {
               callbacks: {
@@ -116,7 +279,6 @@
         }
       });
 
-      // === גרף רישיונות כריתה ===
       if (data.top_licenses) {
         new Chart(document.getElementById('licenseChart'), {
           type: 'bar',
@@ -129,17 +291,12 @@
             }]
           },
           options: {
-            plugins: {
-              legend: { display: false },
-              title: { display: true, text: '🏷️ 10 הערים עם הכי הרבה רישיונות כריתה' }
-              // ❌ הסרת datalabels כדי שלא יוצגו מספרים מעל כל עמודה
-            },
+            plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
           }
         });
       }
 
-      // === גרף סוגי עצים ===
       new Chart(document.getElementById('treeChart'), {
         type: 'bar',
         data: {
@@ -153,7 +310,6 @@
         options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
 
-      // === גרף סיבות כריתה ===
       new Chart(document.getElementById('reasonBarChart'), {
         type: 'bar',
         data: {
@@ -167,7 +323,6 @@
         options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
 
-      // === גרף ערים עם עררים ===
       if (data.appeal_cities) {
         new Chart(document.getElementById('appealCitiesChart'), {
           type: 'bar',
@@ -183,7 +338,6 @@
         });
       }
 
-      // === גרף עררים שהצליחו ===
       if (data.top_successful_appeals) {
         new Chart(document.getElementById('topAppealsChart'), {
           type: 'bar',
@@ -199,7 +353,6 @@
         });
       }
 
-      // === גרף סיבות בעררים מוצלחים ===
       if (data.appeal_reasons) {
         const total = data.appeal_reasons.reduce((sum, r) => sum + r.count, 0);
         new Chart(document.getElementById('appealReasonsChart'), {

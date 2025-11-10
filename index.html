@@ -35,19 +35,12 @@
       transition: background 0.2s ease;
     }
     a.button:hover { background: #388E3C; }
-
-    /* 🖤 GitHub-style button */
     .github-btn { background: #24292f !important; }
     .github-btn:hover { background: #000 !important; }
-
-    /* 🎥 YouTube-style */
     .youtube-btn { background: #e53935 !important; }
     .youtube-btn:hover { background: #c62828 !important; }
-
-    /* 📁 Google Drive-style */
     .drive-btn { background: #1a73e8 !important; }
     .drive-btn:hover { background: #1558b0 !important; }
-
     .desc { text-align: center; font-size: 0.95em; color: #555; margin-top: 10px; margin-bottom: 30px; }
   </style>
 </head>
@@ -57,24 +50,19 @@
     <h2>Gil Hadad | Inbar Abraham</h2>
     <p>Data Analysis & Visualization of Tree-Cutting Permits and Appeals in Israel</p>
     <div style="margin-top:20px;">
-      <!-- GitHub Button -->
       <a href="https://github.com/Gil-Had/TreesDashboard" class="button github-btn" target="_blank">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.94.58.11.79-.25.79-.56v-2.17c-3.2.7-3.88-1.39-3.88-1.39-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.69.08-.69 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.25.73-1.54-2.55-.29-5.23-1.27-5.23-5.63 0-1.24.44-2.26 1.17-3.06-.12-.29-.51-1.47.11-3.06 0 0 .96-.31 3.15 1.17a10.88 10.88 0 0 1 2.87-.39c.97 0 1.95.13 2.87.39 2.18-1.48 3.15-1.17 3.15-1.17.62 1.59.23 2.77.11 3.06.73.8 1.17 1.82 1.17 3.06 0 4.37-2.69 5.33-5.26 5.62.41.36.78 1.07.78 2.15v3.19c0 .31.21.68.8.56A10.5 10.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
         View Code
       </a>
 
-      <!-- YouTube Button -->
       <a href="https://www.youtube.com/watch?v=" class="button youtube-btn" target="_blank">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M19.615 3.184A3.002 3.002 0 0 1 22 6.001v11.998a3 3 0 0 1-2.385 2.816c-2.09.545-7.615.545-7.615.545s-5.525 0-7.615-.545A3 3 0 0 1 2 17.999V6.001a3.002 3.002 0 0 1 2.385-2.817C6.475 2.639 12 2.639 12 2.639s5.525 0 7.615.545zM10 8.5v7l6-3.5-6-3.5z"/></svg>
         Watch Video
       </a>
 
-        <!-- Google Drive Button -->
-        <!-- Google Drive Button -->
-        <a href="https://drive.google.com/file/d//view" class="button drive-btn" target="_blank">
+      <a href="https://drive.google.com/file/d//view" class="button drive-btn" target="_blank">
         📊 View Presentation
-        </a>
-
+      </a>
     </div>
   </header>
 
@@ -88,40 +76,36 @@
   <section id="abstract">
     <h2>Abstract</h2>
     <p>
-      This project presents an interactive data analysis dashboard built with Flask and OpenAI’s API.  
-      The system automatically processes two Excel files — one containing tree-cutting permits and another containing appeals —  
-      cleans and merges the data, extracts insights using GPT-based reasoning, and visualizes key statistics through interactive charts.  
-      The dashboard provides valuable environmental insights and aims to support transparent, data-driven decision-making for forestry management.
+      This project presents an interactive data analysis dashboard built with Python and OpenAI’s GPT-4.1-mini API. <br>
+      The system automatically processes two Excel files (one containing tree-cutting permits and another containing appeals),
+      cleans and merges the data, extracts insights using GPT-based reasoning, and visualizes key statistics through interactive charts. <br>
+      The dashboard provides valuable environmental insights and supports transparent, data-driven decision-making for forestry management.
     </p>
   </section>
 
   <section id="examples">
     <h2>Examples</h2>
-    <p>Below are examples of the original and processed data, alongside the generated visual reports.</p>
 
-    <!-- Appellants before/after -->
     <h3>Editing Appellants File</h3>
     <div class="images">
       <img src="images/appellants_before.png" alt="Appellants file before processing">
       <img src="images/appellants_after.png" alt="Appellants file after processing">
     </div>
     <p class="desc">
-      The original appeals file included unstructured text fields difficult to interpret analytically.  
-      After processing with the OpenAI API, each row is analyzed, interpreted, and summarized into clear, structured columns.
+      The original appeals file included unstructured text fields difficult to analyze.  
+      After processing with the GPT-4.1-mini API, each row is interpreted and summarized into structured, readable columns.
     </p>
 
-    <!-- Trees before/after -->
     <h3>Editing Trees File</h3>
     <div class="images">
       <img src="images/trees_before.png" alt="Trees file before processing">
       <img src="images/trees_after.png" alt="Trees file after processing">
     </div>
     <p class="desc">
-      The original trees file contained multiple sheets and unstructured data.  
-      After processing, all relevant information was merged into one clean, unified sheet, ready for analysis.
+      The original trees file contained multiple sheets and inconsistent formatting.  
+      After processing, all relevant information was merged into one clean, unified sheet ready for analysis.
     </p>
 
-    <!-- Charts -->
     <h3>Dashboard Visualizations</h3>
     <div class="images charts-row" style="display:flex; justify-content:center; flex-wrap:wrap; gap:20px;">
       <img src="images/charts1.png" alt="Dashboard chart 1">
@@ -129,7 +113,7 @@
       <img src="images/charts3.png" alt="Dashboard chart 3">
     </div>
     <p class="desc">
-      These are some of the charts generated by the dashboard — showing city distributions, tree species statistics,  
+      These are some of the charts generated by the dashboard - showing city distributions, tree species statistics,  
       and the most common reasons for cutting or preserving trees.
     </p>
   </section>
@@ -137,28 +121,28 @@
   <section id="details">
     <h2>Technical Details</h2>
     <p>
-      The dashboard was developed using modern data engineering and AI tools to automate Excel-based environmental reporting.
+      The dashboard was developed using modern data engineering and AI tools to automate environmental Excel reporting.
     </p>
     <ul>
-      <li><b>Backend:</b> Python (Flask), Pandas, NumPy, tqdm</li>
-      <li><b>AI Integration:</b> OpenAI GPT API for reasoning and classification</li>
-      <li><b>Frontend:</b> HTML, CSS, JavaScript, Chart.js</li>
-      <li><b>Visualization:</b> Interactive charts showing cities, species, reasons, and appeals</li>
-      <li><b>Deployment:</b> GitHub Pages for presentation and Flask local server for execution</li>
+      <li><b>Backend:</b> Python (Flask), Pandas, NumPy, tqdm.</li>
+      <li><b>AI Integration:</b> OpenAI GPT-4.1-mini API for structured text interpretation.</li>
+      <li><b>Frontend:</b> HTML, CSS, JavaScript, Chart.js.</li>
+      <li><b>Visualization:</b> Interactive charts displaying cities, species, reasons, and appeals.</li>
+      <li><b>Execution:</b> Runs locally using a Python Flask server.</li>
     </ul>
   </section>
 
   <section id="future">
     <h2>Future Work</h2>
     <ul>
-      <li>Enable exporting dashboard charts as a standalone HTML report for NGO website integration.</li>
+      <li>Enable exporting dashboard charts as a standalone HTML report for NGOs and public use.</li>
       <li>Optimize data-processing performance and reduce GPT response time.</li>
-      <li>Automate data fetching from government open-data APIs instead of manual uploads.</li>
+      <li>Automate data retrieval from government open-data APIs instead of manual uploads.</li>
     </ul>
   </section>
 
   <footer>
-    © 2025 Gil Hadad & Inbar Abraham | Ono Academic College | Final Project: Trees Dashboard
+    © 2025 Gil Hadad & Inbar Abraham | Ono Academic College | Trees Dashboard
   </footer>
 </body>
 </html>
