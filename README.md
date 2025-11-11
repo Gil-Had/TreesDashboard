@@ -11,16 +11,16 @@ This project was developed as part of the final B.Sc. Computer Science project a
 1. Install dependencies:
 pip install flask pandas numpy tqdm openai python-dotenv
 
-2. Set your OpenAI API key:
-For macOS / Linux:
-export OPENAI_API_KEY="your_api_key_here"
-For Windows PowerShell:
-setx OPENAI_API_KEY "your_api_key_here"
+2. Set your OpenAI API key:  
+For macOS / Linux:  
+export OPENAI_API_KEY="your_api_key_here"  
+For Windows PowerShell:  
+setx OPENAI_API_KEY "your_api_key_here"  
 
-3. Run the Flask server:
+4. Run the Flask server:
 python main.py
 
-4. Open your browser at:
+5. Open your browser at:
 http://127.0.0.1:5000
 
 Then upload two Excel files — one for tree-cutting permits and one for appeals.  
