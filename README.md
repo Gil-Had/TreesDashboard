@@ -4,7 +4,7 @@ An interactive data analysis and visualization system for forestry data in Israe
 
 This project was developed as part of the final B.Sc. Computer Science project at Ono Academic College. It demonstrates the integration of AI reasoning, data cleaning, and visualization to support transparent decision-making for environmental management.
 
-- - -
+---
 
 ## ⚙️ How to Run
 
@@ -39,6 +39,23 @@ AI Integration: OpenAI GPT-4.1-mini
 Frontend: HTML, CSS, JS, Chart.js  
 Visualization: Bar & Pie charts  
 Execution: Local Flask server
+
+---
+
+### 📁 Project Structure
+
+| File / Folder        | Purpose |
+|--------------------|--------|
+| `index.html`        | Project landing page |
+| `templates/upload.html` | Dashboard UI (file upload + charts) |
+| `main.py`          | Flask backend, data processing & API |
+| `uploads/`         | Stores uploaded Excel files |
+| `outputs/`         | Stores generated processed reports |
+
+💡 **Note:**  
+The first page you see when running the project is `index.html`.  
+The interactive dashboard (upload + graphs) is served from:  
+`/templates/upload.html`
 
 ---
 
