@@ -23,7 +23,7 @@ python main.py
 5. Open your browser at:
 http://127.0.0.1:5000
 
-Then upload two Excel files — one for tree-cutting permits and one for appeals.  
+Then upload two Excel files - one for tree-cutting permits and one for appeals.  
 The dashboard will generate insights and graphs automatically.
 
 ---
@@ -40,6 +40,5 @@ Execution: Local Flask server
 
 ## 👩‍💻 Authors
 
-Gil Hadad  
-Inbar Abraham  
+Gil Hadad & Inbar Abraham  
 Ono Academic College, Department of Computer Science, 2025
