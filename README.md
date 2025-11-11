@@ -40,6 +40,5 @@ Execution: Local Flask server
 
 ## 👩‍💻 Authors
 
-Gil Hadad  
-Inbar Abraham  
+Gil Hadad & Inbar Abraham  
 Ono Academic College, Department of Computer Science, 2025
