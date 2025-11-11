@@ -27,7 +27,7 @@ Then upload two Excel files - one for tree-cutting permits and one for appeals.
 The dashboard will generate insights and graphs automatically.
 
 You can easily download the files here (2024):  
-https://www.gov.il/he/pages/ararim_2023
+https://www.gov.il/he/pages/ararim_2023  
 https://www.gov.il/he/pages/tree_clearing_license_2024
 
 ---
